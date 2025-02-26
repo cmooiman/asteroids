@@ -7,16 +7,27 @@ from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
 
+def display_score(screen, font, score):
+    #Render score text "string, anti-aliasing, color, background (optional)"
+    score_text = font.render(f"Score: {score}", True, "White")
+    #Display the text at coordinates
+    screen.blit(score_text, (10, 10))
+
 def main():
     pygame.init()
     
-    clock = pygame.time.Clock()
     dt = 0
+    score = 0
+    clock = pygame.time.Clock()
     
     # Set up display
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Asteroids!")
 
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    # Used to create a Font object, which can render text to a surface. pygame.font.Font(filename, size, bold=False, italic=False)
+    font = pygame.font.Font(None, 36)
+
+    #The pygame.sprite.Group class in Pygame is a container for Sprite objects. It is used to manage multiple sprites together, making it easier to update and draw them in your game. This class is particularly useful for handling groups of similar objects, such as a collection of enemies or a set of collectible items.
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
@@ -44,6 +55,8 @@ def main():
         for drawables in drawable:
             drawables.draw(screen) 
 
+        display_score(screen, font, score)
+
         # Update the display
         pygame.display.flip()
 
@@ -53,9 +66,9 @@ def main():
                 sys.exit()
             for shot in shots:
                 if shot.collision_check(asteroid) == True:
-                    asteroid.split()
+                    if asteroid.split() == False:
+                        score += 1
                     shot.kill()
-
         
         # Cap the frame rate to 60 frames per second
         dt = (clock.tick(60) / 1000)

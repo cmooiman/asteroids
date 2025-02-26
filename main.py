@@ -6,6 +6,7 @@ from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
+from hudelements import HudElement
 
 def display_score(screen, font, score):
     #Render score text "string, anti-aliasing, color, background (optional)"
@@ -18,6 +19,7 @@ def main():
     
     dt = 0
     score = 0
+    lives = 3
     clock = pygame.time.Clock()
     
     # Set up display
@@ -42,6 +44,10 @@ def main():
 
     Shot.containers = (shots, drawable, updatable)
 
+    HudElement.containers = (drawable)
+    score_hud = HudElement(screen, font, "Score", score, (10,10))
+    lives_hud = HudElement(screen, font, "Lives", lives, (10,40))
+
     # Main game loop
     while True:
         for event in pygame.event.get():
@@ -55,19 +61,26 @@ def main():
         for drawables in drawable:
             drawables.draw(screen) 
 
-        display_score(screen, font, score)
+        score_hud.draw()
+        lives_hud.draw()
 
         # Update the display
         pygame.display.flip()
 
         for asteroid in asteroids:
-            if player.collision_check(asteroid) == True:
-                print("Game Over!")
-                sys.exit()
+            if player.collision_check(asteroid) and not player.invulnerable:
+                if lives > 0:
+                    lives -= 1
+                    lives_hud.count = lives
+                    player.respawn()
+                    player.make_invulnerable()
+                else:
+                    print("Game Over!")
+                    sys.exit()
             for shot in shots:
                 if shot.collision_check(asteroid) == True:
                     if asteroid.split() == False:
-                        score += 1
+                        score_hud.count += 1
                     shot.kill()
         
         # Cap the frame rate to 60 frames per second

@@ -8,6 +8,9 @@ class Player(CircleShape):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
         self.timer = 0
+        self.invulnerable = False
+        self.invulnerable_timer = 0
+        self.invulnerable_duration = 1000
 
     # in the player class
     def triangle(self):
@@ -41,6 +44,11 @@ class Player(CircleShape):
         if self.timer > 0:
             self.timer -= dt
 
+        if self.invulnerable:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.invulnerable_timer > self.invulnerable_duration:
+                self.invulnerable = False
+
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         self.position += forward * PLAYER_SPEED * dt
@@ -51,4 +59,12 @@ class Player(CircleShape):
         shot = Shot(self.position.x, self.position.y)
         shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
         self.timer = PLAYER_SHOOT_COOLDOWN
-        
+
+    def make_invulnerable(self):        
+        self.invulnerable = True
+        self.invulnerable_timer = pygame.time.get_ticks()
+
+    def respawn(self):
+        self.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+        self.velocity = [0, 0]
+        self.rotation = 0
